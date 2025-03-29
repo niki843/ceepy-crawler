@@ -1,7 +1,7 @@
 services:
   fastapi:
     build:
-      context: .
+      context: ./BE
       dockerfile: Dockerfile
     container_name: fastapi_app
     depends_on:
