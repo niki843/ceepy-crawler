@@ -20,7 +20,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     op.create_table(
-        'Screenshot',
+        'screenshot',
         sa.Column('id', sa.UUID, primary_key=True),
         sa.Column('url', sa.String(512), nullable=False),
         sa.Column('path', sa.String(512), nullable=False),

@@ -1,0 +1,1 @@
+docker compose exec fastapi alembic upgrade head
