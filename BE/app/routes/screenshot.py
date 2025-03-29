@@ -1,14 +1,17 @@
 from fastapi import APIRouter
 
+from app.database import get_db_session
 from app.schemas.screenshot import ScreenshotDTO
 from app.services.screenshot_service import ScreenshotService
+from app.dependencies.core import DBSessionDep
 
 router = APIRouter()
 
 @router.post("/screenshot")
-async def capture_screenshot(screenshot_dto: ScreenshotDTO):
+async def capture_screenshot(screenshot_dto: ScreenshotDTO, db_session: DBSessionDep):
     """Captures a screenshot of the given URL."""
-    return await ScreenshotService.take_screenshot(screenshot_dto.start_url, screenshot_dto.extracted_links)
+    screenshot_id = ScreenshotService.start_screenshots(screenshot_dto.start_url, screenshot_dto.extracted_links, db_session)
+    return {"screenshot_id": screenshot_id}
 
 
 

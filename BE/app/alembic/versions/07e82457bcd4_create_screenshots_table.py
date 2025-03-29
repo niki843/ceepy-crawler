@@ -24,6 +24,7 @@ def upgrade() -> None:
         sa.Column('id', sa.UUID, primary_key=True),
         sa.Column('url', sa.String(512), nullable=False),
         sa.Column('path', sa.String(512), nullable=False),
+        sa.Column('status', sa.String(50), nullable=False),
     )
 
 
