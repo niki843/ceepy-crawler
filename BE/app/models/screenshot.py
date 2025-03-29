@@ -1,9 +1,12 @@
 import uuid
 
-from sqlmodel import SQLModel, Field
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Column, String
+
+from BE.app.database import Base
 
 
-class Screenshots(SQLModel, table=True):
-    id: uuid.UUID | None = Field(default_factory=uuid.uuid4, primary_key=True)
-    url: str = Field(nullable=False, index=True)
-    path: str = Field(nullable=False)
+class Screenshots(Base):
+    id:uuid.uuid4 = Column("id", UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    url: str = Column("url", String(512), nullable=False)
+    path: str = Column("path", String(512),nullable=False)
