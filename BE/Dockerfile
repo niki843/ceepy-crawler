@@ -13,6 +13,9 @@ COPY requirements.txt ./
 # Copy alembic.ini file
 COPY alembic.ini ./
 
+# Copy .env file
+COPY .env ./
+
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 

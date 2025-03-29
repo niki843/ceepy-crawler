@@ -10,20 +10,25 @@ from sqlalchemy import insert
 
 
 class ScreenshotService:
-    SCREENSHOT_DIR = "./app/utils/screenshots"
+    SCREENSHOT_DIR = "./app/utils/screenshots/"
 
     @classmethod
     async def start_screenshots(cls, start_url: str , extracted_links: int, db_session: AsyncSession):
         path = cls._generate_path(start_url)
-        screenshot_model = Screenshots(url=start_url, path=path, status=ScreenshotStatus.PENDING)
-        screenshot = await db_session.scalars(insert(screenshot_model))
+        screenshot = Screenshots(url=start_url, path=path, status=ScreenshotStatus.PENDING.value)
+        db_session.add(screenshot)
+        await db_session.commit()
+        await db_session.refresh(screenshot)
+
+        # Create task to fetch screenshots
         asyncio.create_task(cls.take_screenshot(start_url, extracted_links, path))
-        return next(screenshot).id
+
+        return screenshot.id
 
     @classmethod
     async def take_screenshot(cls, start_url: str , extracted_links: int, path: str):
         # TODO: implement creating screenshots with playwright
-        print(f"Screenshot of: {start_url}, links: {extracted_links}")
+        print(f"Screenshot of: {start_url}, links: {extracted_links}, path:{path}")
         return
 
     @classmethod

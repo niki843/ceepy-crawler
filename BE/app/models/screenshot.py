@@ -7,7 +7,7 @@ from app.database import Base
 
 
 class Screenshots(Base):
-    __tablename__ = "screenshots"
+    __tablename__ = "screenshot"
 
     id:uuid.uuid4 = Column("id", UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     url: str = Column("url", String(512), nullable=False)
