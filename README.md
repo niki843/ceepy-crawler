@@ -45,7 +45,13 @@ You also need Python 3.10+ to run locally.
    ```sh
    docker-compose up -d
    ```
+   
+2. **Run migrations script**:
 
+   ```sh
+   ./BE/scripts/run_migrations.sh
+   ```
+   
 ---
 
 ## **Endpoints**
