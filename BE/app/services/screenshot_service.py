@@ -10,6 +10,7 @@ from playwright.async_api import async_playwright
 from sqlalchemy import select, update, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.responses import FileResponse
+from starlette.responses import JSONResponse
 
 from app.models.screenshot import Screenshot
 from app.utils.core import fetch_file_names_in_path, get_host_from_url, sanitize_str
@@ -150,7 +151,7 @@ class ScreenshotService:
             raise HTTPException(status_code=404, detail="Screenshot not found")
 
         if screenshot.status != ScreenshotStatus.DONE.value:
-            return {"id": screenshot.id, "status": screenshot.status}
+            return JSONResponse(status_code=202, content={"id": screenshot.id, "status": screenshot.status})
 
         full_path = Path(screenshot.path)
         base_path = Path("./app/utils")
