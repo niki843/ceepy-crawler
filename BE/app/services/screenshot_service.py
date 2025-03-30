@@ -3,7 +3,8 @@ import os
 
 from datetime import date
 
-from sqlalchemy import select
+from playwright.async_api import async_playwright
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.responses import FileResponse
 
@@ -23,15 +24,21 @@ class ScreenshotService:
         await db_session.refresh(screenshot)
 
         # Create task to fetch screenshots
-        asyncio.create_task(cls.take_screenshot(start_url, extracted_links, path))
+        asyncio.create_task(cls.take_screenshot(start_url, extracted_links, path, db_session, str(screenshot.id)))
 
         return screenshot.id
 
     @classmethod
-    async def take_screenshot(cls, start_url: str , extracted_links: int, path: str):
-        # TODO: implement creating screenshots with playwright
-        print(f"Screenshot of: {start_url}, links: {extracted_links}, path:{path}")
-        return
+    async def take_screenshot(cls, start_url: str , extracted_links: int, path: str, db_session: AsyncSession, id:str):
+        async with async_playwright() as playwright:
+            browser = await playwright.chromium.launch()
+            page = await browser.new_page()
+            await page.goto(start_url)
+            await page.screenshot(path=path, type="png")
+            await browser.close()
+
+        await db_session.execute(update(Screenshot).where(Screenshot.id==id).values(status=ScreenshotStatus.DONE.value))
+        await db_session.commit()
 
     @classmethod
     def _generate_path(cls, url: str):
