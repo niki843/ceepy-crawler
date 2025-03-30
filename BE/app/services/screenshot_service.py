@@ -151,7 +151,7 @@ class ScreenshotService:
             raise HTTPException(status_code=404, detail="Screenshot not found")
 
         if screenshot.status != ScreenshotStatus.DONE.value:
-            return JSONResponse(status_code=202, content={"id": screenshot.id, "status": screenshot.status})
+            return JSONResponse(status_code=202, content={"id": str(screenshot.id), "status": screenshot.status})
 
         full_path = Path(screenshot.path)
         base_path = Path("./app/utils")
