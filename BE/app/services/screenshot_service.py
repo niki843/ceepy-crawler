@@ -2,7 +2,6 @@ import asyncio
 import os
 
 from datetime import datetime
-from pathlib import Path
 from venv import logger
 
 from fastapi import HTTPException
