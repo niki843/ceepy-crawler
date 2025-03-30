@@ -64,7 +64,7 @@ You also need Python 3.10+ to run locally.
     ```json
     {
       "start_url": "https://example.com/"
-      "links_to_follow_amount": 4
+      "extracted_links": 4
     }
     ```
 - **Response**:
@@ -81,7 +81,7 @@ You also need Python 3.10+ to run locally.
 #### **Response**:
 - **Status Code**: `200 OK`
 - **Content-Type**: `image/png` (or `image/jpeg`)
-- **Body**: The raw image data (screenshot).
+- **Body**: Image data.
 
 ---
 
