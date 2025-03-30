@@ -52,6 +52,8 @@ class ScreenshotService:
             await db_session.commit()
             await db_session.refresh(new_screenshot)
 
+            logger.debug(f"Url screenshots already created, returning record with existing path screenshot: {new_screenshot.id}")
+
             return new_screenshot.id
 
         created_at = datetime.now()
@@ -66,6 +68,8 @@ class ScreenshotService:
         db_session.add(screenshot)
         await db_session.commit()
         await db_session.refresh(screenshot)
+
+        logger.debug(f"Creating screenshots: {screenshot.id}")
 
         # Create task to fetch screenshots
         asyncio.create_task(
