@@ -153,16 +153,12 @@ class ScreenshotService:
         if screenshot.status != ScreenshotStatus.DONE.value:
             return JSONResponse(status_code=202, content={"id": str(screenshot.id), "status": screenshot.status})
 
-        full_path = Path(screenshot.path)
-        base_path = Path("./app/utils")
-        relative_path = str(full_path.relative_to(base_path))
-
         all_files = fetch_file_names_in_path(screenshot.path)
         response_files = []
         for index in range(0, screenshot.requested_links + 1):
             filename = os.fsdecode(all_files[index])
             response_files.append(
-                FileResponse(base_url + relative_path + "/" + filename, media_type="image/png")
+                FileResponse(base_url + screenshot.path.replace("./app/utils/", "") + "/" + filename, media_type="image/png")
             )
 
         return response_files
