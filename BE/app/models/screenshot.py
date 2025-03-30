@@ -6,7 +6,7 @@ from sqlalchemy import Column, String
 from app.database import Base
 
 
-class Screenshots(Base):
+class Screenshot(Base):
     __tablename__ = "screenshot"
 
     id:uuid.uuid4 = Column("id", UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)

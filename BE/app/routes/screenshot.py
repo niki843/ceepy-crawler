@@ -13,6 +13,6 @@ async def capture_screenshot(screenshot_dto: ScreenshotDTO, db_session: DBSessio
     return {"screenshot_id": screenshot_id}
 
 @router.get("/screenshot/{id}")
-async def fetch_screenshot(id: str):
+async def fetch_screenshot(id: str, db_session: DBSessionDep):
     """Retrieves a screenshot from storage."""
-    return await ScreenshotService.get_screenshot(id)
+    return await ScreenshotService.get_screenshot(id, db_session)

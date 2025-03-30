@@ -1,4 +1,4 @@
-"""Create Screenshots table
+"""Create Screenshot table
 
 Revision ID: 07e82457bcd4
 Revises: 

@@ -1,12 +1,15 @@
 import asyncio
+import os
 
 from datetime import date
 
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi.responses import StreamingResponse
+from fastapi.responses import FileResponse
 
-from app.models.screenshot import Screenshots
+from app.models.screenshot import Screenshot
 from app.utils.enums import ScreenshotStatus
-from sqlalchemy import insert
 
 
 class ScreenshotService:
@@ -15,7 +18,7 @@ class ScreenshotService:
     @classmethod
     async def start_screenshots(cls, start_url: str , extracted_links: int, db_session: AsyncSession):
         path = cls._generate_path(start_url)
-        screenshot = Screenshots(url=start_url, path=path, status=ScreenshotStatus.PENDING.value)
+        screenshot = Screenshot(url=start_url, path=path, status=ScreenshotStatus.PENDING.value)
         db_session.add(screenshot)
         await db_session.commit()
         await db_session.refresh(screenshot)
@@ -37,7 +40,17 @@ class ScreenshotService:
         return path
 
     @classmethod
-    async def get_screenshot(id: str):
-        # TODO: implement returning screenshots
-        print(f"Id: {id}")
-        return
+    async def get_screenshot(cls, screenshot_id: str, db_session: AsyncSession):
+        screenshots = await db_session.execute(select(Screenshot).filter(Screenshot.id == screenshot_id))
+        screenshot = screenshots.scalars().first()
+
+        if screenshot.status != ScreenshotStatus.DONE.value:
+            return {"id": screenshot.id, "status": screenshot.status}
+
+        directory = os.fsencode(screenshot.path)
+        files = []
+        for file in os.listdir(directory):
+            filename = os.fsdecode(file)
+            files.append(FileResponse(screenshot.path + filename, media_type="image/png"))
+
+        return files
