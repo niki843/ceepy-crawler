@@ -152,9 +152,11 @@ class ScreenshotService:
         screenshot = screenshots.scalars().first()
 
         if not screenshot:
+            logger.debug(f"Searching for screenshot with id: {screenshot_id}, not found!")
             raise HTTPException(status_code=404, detail="Screenshot not found")
 
         if screenshot.status != ScreenshotStatus.DONE.value:
+            logger.debug(f"Waiting for screenshot: {screenshot_id}, status: {screenshot.status}")
             return JSONResponse(status_code=202, content={"id": str(screenshot.id), "status": screenshot.status})
 
         all_files = fetch_file_names_in_path(screenshot.path)
