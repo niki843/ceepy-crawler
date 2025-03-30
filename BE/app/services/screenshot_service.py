@@ -4,6 +4,7 @@ import os
 from datetime import datetime
 from venv import logger
 
+from fastapi import HTTPException
 from playwright.async_api import async_playwright
 from sqlalchemy import select, update, desc
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -127,6 +128,9 @@ class ScreenshotService:
             select(Screenshot).filter(Screenshot.id == screenshot_id)
         )
         screenshot = screenshots.scalars().first()
+
+        if not screenshot:
+            raise HTTPException(status_code=404, detail="Screenshot not found")
 
         if screenshot.status != ScreenshotStatus.DONE.value:
             return {"id": screenshot.id, "status": screenshot.status}
