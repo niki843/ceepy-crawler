@@ -1,7 +1,8 @@
 import asyncio
 import os
 
-from datetime import date
+from datetime import datetime
+from venv import logger
 
 from playwright.async_api import async_playwright
 from sqlalchemy import select, update
@@ -9,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.responses import FileResponse
 
 from app.models.screenshot import Screenshot
-from app.utils.core import sanitize_url, fetch_file_names_in_path
+from app.utils.core import fetch_file_names_in_path, get_host_from_url, sanitize_str
 from app.utils.enums import ScreenshotStatus
 
 
@@ -36,19 +37,31 @@ class ScreenshotService:
             page = await browser.new_page()
             await page.goto(start_url)
 
-            file_name = f"{sanitize_url(start_url)}.png"
+            file_name = f"{get_host_from_url(start_url)}.png"
             await page.screenshot(path=path + file_name, type="png")
 
             # Fetch all links
             links = await page.locator("a").evaluate_all("elements => elements.map(el => el.href)")
+
+            # Remove duplicates and invalid urls
+            links = list(set(links))
+            links.remove("")
 
             # Follow and screenshot extracted_links count
             for index in range(0, extracted_links):
                 if index >= len(links):
                     break
 
-                await page.goto(links[index])
-                file_name = f"{sanitize_url(links[index])}.png"
+                if links[index] == start_url:
+                    continue
+
+                try:
+                    await page.goto(links[index])
+                except Exception as e:
+                    logger.error(f"Failed to load link: {links[index]} Error: {e}")
+                    continue
+
+                file_name = f"{get_host_from_url(links[index])}{index}.png"
                 await page.screenshot(path=path + file_name, type="png")
 
             await browser.close()
@@ -58,7 +71,7 @@ class ScreenshotService:
 
     @classmethod
     def _generate_path(cls, url: str):
-        path = cls.SCREENSHOT_DIR + sanitize_url(url) + str(date.today()) + "/"
+        path = cls.SCREENSHOT_DIR + get_host_from_url(url) + sanitize_str(str(datetime.now()), "_") + "/"
         return path
 
     @classmethod
