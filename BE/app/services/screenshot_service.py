@@ -141,7 +141,6 @@ class ScreenshotService:
             + sanitize_str(created_at, "_")
             + "/"
         )
-        print(path)
         return path
 
     @classmethod
