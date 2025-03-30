@@ -39,7 +39,10 @@ class ScreenshotService:
             file_name = f"{get_host_from_url(start_url)}.png"
             await page.screenshot(path=path + file_name, type="png")
 
+            # Fetch all links
             links = await page.locator("a").evaluate_all("elements => elements.map(el => el.href)")
+
+            # Follow and screenshot extracted_links count
             for index in range(0, extracted_links):
                 await page.goto(links[index])
                 file_name = f"{get_host_from_url(start_url)}{index}.png"
