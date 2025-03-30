@@ -1,7 +1,7 @@
 import uuid
 
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy import Column, String
+from sqlalchemy import Column, String, DateTime
 
 from app.database import Base
 
@@ -13,3 +13,4 @@ class Screenshot(Base):
     url: str = Column("url", String(512), nullable=False)
     path: str = Column("path", String(512),nullable=False)
     status: str = Column("status", String(50),nullable=False)
+    created_at: str = Column("created_at", DateTime,nullable=False)

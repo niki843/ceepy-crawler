@@ -19,8 +19,9 @@ class ScreenshotService:
 
     @classmethod
     async def start_screenshots(cls, start_url: str , extracted_links: int, db_session: AsyncSession):
-        path = cls._generate_path(start_url)
-        screenshot = Screenshot(url=start_url, path=path, status=ScreenshotStatus.PENDING.value)
+        created_at = datetime.now()
+        path = cls._generate_path(start_url, str(created_at))
+        screenshot = Screenshot(url=start_url, path=path, status=ScreenshotStatus.PENDING.value, created_at=created_at)
         db_session.add(screenshot)
         await db_session.commit()
         await db_session.refresh(screenshot)
@@ -70,8 +71,8 @@ class ScreenshotService:
         await db_session.commit()
 
     @classmethod
-    def _generate_path(cls, url: str):
-        path = cls.SCREENSHOT_DIR + get_host_from_url(url) + sanitize_str(str(datetime.now()), "_") + "/"
+    def _generate_path(cls, url: str, created_at: str):
+        path = cls.SCREENSHOT_DIR + get_host_from_url(url) + sanitize_str(created_at, "_") + "/"
         return path
 
     @classmethod

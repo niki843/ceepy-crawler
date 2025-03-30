@@ -24,7 +24,7 @@ target_metadata = None
 
 def get_url():
     load_dotenv()
-    return os.getenv("DATABASE_URL")
+    return os.getenv("DATABASE_URL").replace("postgresql+asyncpg", "postgresql")
 
 
 def run_migrations_offline() -> None:

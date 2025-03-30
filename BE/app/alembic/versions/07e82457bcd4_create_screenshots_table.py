@@ -25,6 +25,7 @@ def upgrade() -> None:
         sa.Column('url', sa.String(512), nullable=False),
         sa.Column('path', sa.String(512), nullable=False),
         sa.Column('status', sa.String(50), nullable=False),
+        sa.Column('created_at', sa.DateTime, nullable=False),
     )
 
 
