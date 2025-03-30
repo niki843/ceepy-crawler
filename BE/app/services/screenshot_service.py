@@ -32,7 +32,8 @@ class ScreenshotService:
         # Validate if the screenshots were created today, having in mind that they might be changed if they are older
         # Check if there are enough screenshots depending on the required + 1 because of the start link
         if (
-            screenshot.created_at.date() == datetime.now().date()
+            screenshot
+            and screenshot.created_at.date() == datetime.now().date()
             and len(fetch_file_names_in_path(screenshot.path)) <= extracted_links + 1
         ):
             return screenshot.id
