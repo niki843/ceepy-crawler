@@ -1,6 +1,11 @@
-import re
+import os
 
 
-def get_host_from_url(url: str):
-    match = re.search(r"https?:\/\/([^\/]+)", url)
-    return match.group(1)
+def sanitize_url(url: str):
+    url = url.replace("https://", "")
+    url = url.replace("http://", "")
+    return url.replace("/", "_")
+
+def fetch_file_names_in_path(path: str):
+    directory = os.fsencode(path)
+    return os.listdir(directory)

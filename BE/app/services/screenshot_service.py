@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.responses import FileResponse
 
 from app.models.screenshot import Screenshot
-from app.utils.core import get_host_from_url
+from app.utils.core import sanitize_url, fetch_file_names_in_path
 from app.utils.enums import ScreenshotStatus
 
 
@@ -36,7 +36,7 @@ class ScreenshotService:
             page = await browser.new_page()
             await page.goto(start_url)
 
-            file_name = f"{get_host_from_url(start_url)}.png"
+            file_name = f"{sanitize_url(start_url)}.png"
             await page.screenshot(path=path + file_name, type="png")
 
             # Fetch all links
@@ -44,8 +44,11 @@ class ScreenshotService:
 
             # Follow and screenshot extracted_links count
             for index in range(0, extracted_links):
+                if index >= len(links):
+                    break
+
                 await page.goto(links[index])
-                file_name = f"{get_host_from_url(start_url)}{index}.png"
+                file_name = f"{sanitize_url(links[index])}.png"
                 await page.screenshot(path=path + file_name, type="png")
 
             await browser.close()
@@ -55,7 +58,7 @@ class ScreenshotService:
 
     @classmethod
     def _generate_path(cls, url: str):
-        path = cls.SCREENSHOT_DIR + get_host_from_url(url) + str(date.today()) + "/"
+        path = cls.SCREENSHOT_DIR + sanitize_url(url) + str(date.today()) + "/"
         return path
 
     @classmethod
@@ -66,9 +69,8 @@ class ScreenshotService:
         if screenshot.status != ScreenshotStatus.DONE.value:
             return {"id": screenshot.id, "status": screenshot.status}
 
-        directory = os.fsencode(screenshot.path)
         files = []
-        for file in os.listdir(directory):
+        for file in fetch_file_names_in_path(screenshot.path):
             filename = os.fsdecode(file)
             files.append(FileResponse(screenshot.path + filename, media_type="image/png"))
 
