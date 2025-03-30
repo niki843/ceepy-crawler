@@ -5,7 +5,6 @@ from datetime import date
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi.responses import StreamingResponse
 from fastapi.responses import FileResponse
 
 from app.models.screenshot import Screenshot
