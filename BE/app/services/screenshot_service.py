@@ -26,7 +26,7 @@ class ScreenshotService:
         screenshots = await db_session.execute(
             select(Screenshot)
             .filter(Screenshot.url == start_url)
-            .order_by(desc(Screenshot.created_at))
+            .order_by(desc(Screenshot.requested_links), desc(Screenshot.created_at))
             .limit(1)
         )
         screenshot = screenshots.scalars().first()
@@ -36,9 +36,20 @@ class ScreenshotService:
         if (
             screenshot
             and screenshot.created_at.date() == datetime.now().date()
-            and len(fetch_file_names_in_path(screenshot.path)) >= extracted_links + 1
+            and screenshot.requested_links >= extracted_links
         ):
-            return screenshot.id
+            new_screenshot = Screenshot(
+                url=start_url,
+                path=screenshot.path,
+                status=ScreenshotStatus.DONE.value,
+                requested_links=extracted_links,
+                created_at=datetime.now(),
+            )
+            db_session.add(new_screenshot)
+            await db_session.commit()
+            await db_session.refresh(new_screenshot)
+
+            return new_screenshot.id
 
         created_at = datetime.now()
         path = cls._generate_path(start_url, str(created_at))
@@ -46,6 +57,7 @@ class ScreenshotService:
             url=start_url,
             path=path,
             status=ScreenshotStatus.PENDING.value,
+            requested_links=extracted_links,
             created_at=created_at,
         )
         db_session.add(screenshot)
@@ -75,7 +87,7 @@ class ScreenshotService:
             page = await browser.new_page()
             await page.goto(start_url)
 
-            file_name = f"{get_host_from_url(start_url)}.png"
+            file_name = f"0{get_host_from_url(start_url)}.png"
             await page.screenshot(path=path + file_name, type="png")
 
             # Fetch all links
@@ -101,7 +113,7 @@ class ScreenshotService:
                     logger.error(f"Failed to load link: {links[index]} Error: {e}")
                     continue
 
-                file_name = f"{get_host_from_url(links[index])}{index}.png"
+                file_name = f"{index+1}{get_host_from_url(links[index])}.png"
                 await page.screenshot(path=path + file_name, type="png")
 
             await browser.close()
@@ -141,11 +153,12 @@ class ScreenshotService:
         base_path = Path("./app/utils")
         relative_path = str(full_path.relative_to(base_path))
 
-        files = []
-        for file in fetch_file_names_in_path(screenshot.path):
-            filename = os.fsdecode(file)
-            files.append(
+        all_files = fetch_file_names_in_path(screenshot.path)
+        response_files = []
+        for index in range(0, screenshot.requested_links + 1):
+            filename = os.fsdecode(all_files[index])
+            response_files.append(
                 FileResponse(base_url + relative_path + "/" + filename, media_type="image/png")
             )
 
-        return files
+        return response_files
