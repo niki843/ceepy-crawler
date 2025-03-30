@@ -23,6 +23,7 @@ class ScreenshotService:
     async def start_screenshots(
         cls, start_url: str, extracted_links: int, db_session: AsyncSession
     ):
+        # Order by request links and created at to ensure getting the newest record with the maximum files
         screenshots = await db_session.execute(
             select(Screenshot)
             .filter(Screenshot.url == start_url)
@@ -33,6 +34,7 @@ class ScreenshotService:
 
         # Validate if the screenshots were created today, having in mind that they might be changed if they are older
         # Check if there are enough screenshots depending on the required + 1 because of the start link
+        # Return new record using the already created path
         if (
             screenshot
             and screenshot.created_at.date() == datetime.now().date()
@@ -113,6 +115,7 @@ class ScreenshotService:
                     logger.error(f"Failed to load link: {links[index]} Error: {e}")
                     continue
 
+                # Added indexing as start of file naming to ensure order is kept
                 file_name = f"{index+1}{get_host_from_url(links[index])}.png"
                 await page.screenshot(path=path + file_name, type="png")
 
