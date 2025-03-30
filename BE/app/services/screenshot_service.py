@@ -2,6 +2,7 @@ import asyncio
 import os
 
 from datetime import datetime
+from pathlib import Path
 from venv import logger
 
 from fastapi import HTTPException
@@ -35,7 +36,7 @@ class ScreenshotService:
         if (
             screenshot
             and screenshot.created_at.date() == datetime.now().date()
-            and len(fetch_file_names_in_path(screenshot.path)) <= extracted_links + 1
+            and len(fetch_file_names_in_path(screenshot.path)) >= extracted_links + 1
         ):
             return screenshot.id
 
@@ -120,10 +121,11 @@ class ScreenshotService:
             + sanitize_str(created_at, "_")
             + "/"
         )
+        print(path)
         return path
 
     @classmethod
-    async def get_screenshot(cls, screenshot_id: str, db_session: AsyncSession):
+    async def get_screenshots(cls, screenshot_id: str, db_session: AsyncSession, base_url: str):
         screenshots = await db_session.execute(
             select(Screenshot).filter(Screenshot.id == screenshot_id)
         )
@@ -135,11 +137,15 @@ class ScreenshotService:
         if screenshot.status != ScreenshotStatus.DONE.value:
             return {"id": screenshot.id, "status": screenshot.status}
 
+        full_path = Path(screenshot.path)
+        base_path = Path("./app/utils")
+        relative_path = str(full_path.relative_to(base_path))
+
         files = []
         for file in fetch_file_names_in_path(screenshot.path):
             filename = os.fsdecode(file)
             files.append(
-                FileResponse(screenshot.path + filename, media_type="image/png")
+                FileResponse(base_url + relative_path + "/" + filename, media_type="image/png")
             )
 
         return files

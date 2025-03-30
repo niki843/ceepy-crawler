@@ -1,6 +1,8 @@
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 
 from app.database import sessionmanager
 from app.routes import screenshot, health
@@ -25,3 +27,6 @@ def read_root():
 # Include Routes
 app.include_router(screenshot.router)
 app.include_router(health.router)
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+app.mount("/screenshots", StaticFiles(directory=BASE_DIR + "/utils/screenshots"), name="screenshots")

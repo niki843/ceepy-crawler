@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 
 from app.schemas.screenshot import ScreenshotDTO
 from app.services.screenshot_service import ScreenshotService
@@ -17,6 +17,6 @@ async def capture_screenshot(screenshot_dto: ScreenshotDTO, db_session: DBSessio
 
 
 @router.get("/screenshot/{id}")
-async def fetch_screenshot(id: str, db_session: DBSessionDep):
+async def fetch_screenshot(request: Request, id: str, db_session: DBSessionDep):
     """Retrieves a screenshot from storage."""
-    return await ScreenshotService.get_screenshot(id, db_session)
+    return await ScreenshotService.get_screenshots(id, db_session, str(request.base_url))
