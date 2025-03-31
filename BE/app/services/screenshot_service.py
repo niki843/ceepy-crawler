@@ -91,19 +91,17 @@ class ScreenshotService:
         async with async_playwright() as playwright:
             browser = await playwright.chromium.launch()
             page = await browser.new_page()
+
             await page.goto(start_url)
 
             file_name = f"0{get_host_from_url(start_url)}.png"
             await page.screenshot(path=path + file_name, type="png")
 
             # Fetch all links
-            links = await page.locator("a").evaluate_all(
-                "elements => elements.map(el => el.href)"
-            )
+            links = await page.eval_on_selector_all("a", "elements => elements.map(el => el.href)")
 
-            # Remove duplicates and invalid urls
+            # # Remove duplicates
             links = list(set(links))
-            links.remove("")
 
             # Follow and screenshot extracted_links count
             for index in range(0, extracted_links):
