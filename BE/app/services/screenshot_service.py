@@ -102,14 +102,12 @@ class ScreenshotService:
 
             # # Remove duplicates
             links = list(set(links))
+            links.remove(start_url)
 
             # Follow and screenshot extracted_links count
             for index in range(0, extracted_links):
                 if index >= len(links):
                     break
-
-                if links[index] == start_url:
-                    continue
 
                 try:
                     await page.goto(links[index])
